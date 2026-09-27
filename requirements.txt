@@ -1,0 +1,11 @@
+Flask
+Flask-Login
+Flask-SQLAlchemy
+Flask-WTF
+Werkzeug
+itsdangerous
+jinja2
+gunicorn
+reportlab>=4.4.3
+svglib==1.6.0
+psycopg2-binary
