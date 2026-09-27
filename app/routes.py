@@ -42,27 +42,17 @@ def dashboard():
     followup_counts = [0] * 12
     invoice_counts = [0] * 12
 
-    # follow-ups: group by month (works with SQLite and most DBs)
-    # extract month via strftime('%m', datetime)
-    followup_rows = db.session.query(
-        func.strftime('%m', FollowUp.followup_datetime).label('m'),
-        func.count(FollowUp.id)
-    ).group_by('m').all()
-
-    for m, cnt in followup_rows:
-        # m is '01'..'12' (string) in sqlite
-        idx = int(m) - 1
-        followup_counts[idx] = int(cnt)
+    # follow-ups: group by month (cross-database compatible)
+    for fu in FollowUp.query.all():
+        if fu.followup_datetime:
+            idx = fu.followup_datetime.month - 1
+            followup_counts[idx] += 1
 
     # invoices: group by created_at month
-    invoice_rows = db.session.query(
-        func.strftime('%m', Invoice.created_at).label('m'),
-        func.count(Invoice.id)
-    ).group_by('m').all()
-
-    for m, cnt in invoice_rows:
-        idx = int(m) - 1
-        invoice_counts[idx] = int(cnt)
+    for inv in Invoice.query.all():
+        if inv.created_at:
+            idx = inv.created_at.month - 1
+            invoice_counts[idx] += 1
 
     # recent followups for display (limit 5)
     recent_followups = FollowUp.query.order_by(FollowUp.followup_datetime.desc()).limit(5).all()
