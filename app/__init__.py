@@ -27,12 +27,18 @@ def create_app():
         from .models import User, RoleEnum
         db.create_all()
         try:
-            if not User.query.filter_by(username="admin").first():
+            admin_user = User.query.filter_by(username="admin").first()
+            if not admin_user:
                 admin_user = User(username="admin", role=RoleEnum.Admin.value)
                 admin_user.set_password("admin123")
                 db.session.add(admin_user)
                 db.session.commit()
                 print("Default admin user created: admin / admin123")
+            else:
+                admin_user.set_password("admin123")
+                admin_user.role = RoleEnum.Admin.value
+                db.session.commit()
+                print("Admin user updated: admin / admin123")
         except Exception as e:
             db.session.rollback()
             print(f"Error seeding admin user: {e}")

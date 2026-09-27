@@ -87,6 +87,11 @@
             padding: 25px;
         }
 
+        .content.no-sidebar {
+            margin-left: 0;
+            padding: 40px 20px;
+        }
+
         /* -------- TOGGLE SWITCH -------- */
         .theme-toggle {
             cursor: pointer;
@@ -100,22 +105,23 @@
 
 <body>
 
+{% if current_user.is_authenticated %}
 <!-- =================== SIDEBAR =================== -->
 <div class="sidebar">
     <h4 class="text-center fw-bold mb-3" style="color: var(--sidebar-text);">
         CRM <span class="text-primary">Pro</span>
     </h4>
 
-    <a class="{% if request.path == '/dashboard' %}active{% endif %}" href="{{ url_for('dashboard') }}">
+    <a class="{% if request.path == '/dashboard' or request.path == '/' %}active{% endif %}" href="{{ url_for('dashboard') }}">
         <i class="bi bi-speedometer2 me-2"></i> Dashboard
     </a>
 
-    <a class="{% if request.path == '/' %}active{% endif %}" href="{{ url_for('home') }}">
+    <a class="{% if request.path == '/home' %}active{% endif %}" href="{{ url_for('home') }}">
         <i class="bi bi-house-door me-2"></i> Home
     </a>
     <a class="{% if '/contact' in request.path %}active{% endif %}" href="{{ url_for('contact') }}">
-    <i class="bi bi-telephone me-2"></i> Contact Us
-</a>
+        <i class="bi bi-telephone me-2"></i> Contact Us
+    </a>
 
     {% if current_user.role in ["Admin", "Sales"] %}
     <a class="{% if '/followups' in request.path %}active{% endif %}" href="{{ url_for('followups') }}">
@@ -179,9 +185,22 @@
 
     </div>
 </div>
+{% endif %}
 
 <!-- =================== PAGE CONTENT =================== -->
-<div class="content">
+<div class="content {% if not current_user.is_authenticated %}no-sidebar{% endif %}">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="container mb-3" style="max-width: 900px;">
+          {% for category, message in messages %}
+            <div class="alert alert-{{ category if category != 'error' else 'danger' }} alert-dismissible fade show shadow-sm" role="alert">
+              {{ message }}
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
     {% block content %}
     {% endblock %}
 </div>
